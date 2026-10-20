@@ -20,7 +20,12 @@ export function Profile() {
           credentials: 'include',
         });
         if (!cancelled && res.ok) {
-          setUser(await res.json());
+          const u = await res.json();
+          setUser(u);
+          if (typeof window !== "undefined" && window.localStorage) {
+            localStorage.setItem("chessflow_user", JSON.stringify(u));
+          }
+          return;
         }
       } catch (err) {
         console.error('Failed to fetch user:', err);

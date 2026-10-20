@@ -70,6 +70,7 @@ export const ChessBoard = memo(
     board,
     socket,
     setBoard,
+    onMove,
   }: {
     myColor: Color;
     gameId: string;
@@ -95,7 +96,8 @@ export const ChessBoard = memo(
         }
       | null
     )[][];
-    socket: WebSocket;
+    socket?: WebSocket | null;
+    onMove?: (moveResult: any) => void;
   }) => {
     const { theme } = useThemeContext();
 
@@ -288,12 +290,17 @@ export const ChessBoard = memo(
           setFrom(null);
           setLegalMoves([]);
           if (moveResult.san.includes('#')) setGameOver(true);
-          socket.send(
-            JSON.stringify({
-              type: MOVE,
-              payload: { gameId, move: moveResult },
-            }),
-          );
+          if (socket && socket.readyState === WebSocket.OPEN) {
+            socket.send(
+              JSON.stringify({
+                type: MOVE,
+                payload: { gameId, move: moveResult },
+              }),
+            );
+          }
+          if (onMove) {
+            onMove(moveResult);
+          }
         }
       } catch (e) {
         console.log('Invalid move', e);

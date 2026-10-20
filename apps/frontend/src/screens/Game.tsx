@@ -322,11 +322,69 @@ export const Game = () => {
     if (e.key === 'Enter') sendChat();
   }
 
-  if (!socket || !user) {
+  const [connTimeout, setConnTimeout] = useState(false);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (!socket) setConnTimeout(true);
+    }, 2500);
+    return () => clearTimeout(timer);
+  }, [socket]);
+
+  if (!user) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[400px] text-slate-400 space-y-3">
-        <div className="w-8 h-8 rounded-full border-2 border-cyan-400 border-t-transparent animate-spin" />
-        <p className="text-sm">Connecting to game server...</p>
+      <div className="flex flex-col items-center justify-center min-h-[420px] text-center p-6 space-y-4">
+        <div className="w-16 h-16 rounded-2xl bg-violet-600/20 border border-violet-500/30 flex items-center justify-center text-3xl">
+          ♔
+        </div>
+        <h2 className="text-2xl font-black text-white">Sign In Required</h2>
+        <p className="text-sm text-slate-400 max-w-sm">
+          Please sign in to join online multiplayer matchmaking and track your Elo rating.
+        </p>
+        <button
+          onClick={() => navigate("/login")}
+          className="px-6 py-3 rounded-2xl bg-gradient-to-r from-cyan-500 to-violet-600 hover:from-cyan-400 hover:to-violet-500 text-white font-bold text-sm shadow-lg shadow-cyan-500/20 transition-all hover:scale-105"
+        >
+          Go to Sign In
+        </button>
+      </div>
+    );
+  }
+
+  if (!socket) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[420px] text-center p-6 space-y-5">
+        <div className="w-16 h-16 rounded-2xl bg-slate-900 border border-slate-800 flex items-center justify-center">
+          {connTimeout ? (
+            <span className="text-3xl text-amber-400">⚡</span>
+          ) : (
+            <div className="w-8 h-8 rounded-full border-2 border-cyan-400 border-t-transparent animate-spin" />
+          )}
+        </div>
+        <div>
+          <h2 className="text-2xl font-black text-white">
+            {connTimeout ? "Multiplayer Gateway Standby" : "Connecting to Multiplayer Gateway"}
+          </h2>
+          <p className="text-sm text-slate-400 max-w-md mt-1.5 mx-auto">
+            {connTimeout
+              ? "The WebSocket server (ws://localhost:8080) is not active. You can play right now against the built-in Minimax AI engine with zero latency!"
+              : "Establishing encrypted WebSocket handshake with matchmaking pool..."}
+          </p>
+        </div>
+        <div className="flex flex-wrap items-center justify-center gap-3">
+          <button
+            onClick={() => navigate("/game/computer")}
+            className="px-6 py-3.5 rounded-2xl bg-gradient-to-r from-cyan-500 via-indigo-600 to-violet-600 hover:from-cyan-400 hover:to-violet-500 text-white font-bold text-sm shadow-xl shadow-cyan-500/25 transition-all hover:scale-105"
+          >
+            Play Against Minimax AI
+          </button>
+          <button
+            onClick={() => window.location.reload()}
+            className="px-5 py-3.5 rounded-2xl bg-slate-800/80 hover:bg-slate-700/80 border border-slate-700 text-slate-300 font-semibold text-sm transition-all"
+          >
+            Retry Connection
+          </button>
+        </div>
       </div>
     );
   }
