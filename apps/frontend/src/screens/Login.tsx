@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { useRef } from 'react';
 import { useRecoilState } from 'recoil';
-import { userAtom } from '../../../../packages/store/src/atoms/user';
+import { User, userAtom } from '../../../../packages/store/src/atoms/user';
 import { UserIcon, ArrowRightIcon } from 'lucide-react';
 import { GitHubLogoIcon } from '@radix-ui/react-icons';
 
@@ -25,7 +25,7 @@ const Login = () => {
 
   const loginAsGuest = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
-    const name = guestName.current?.value.trim() || 'Guest Player';
+    const name = guestName.current?.value.trim() || 'Grandmaster';
     try {
       const response = await fetch(`${BACKEND_URL}/auth/guest`, {
         method: 'POST',
@@ -39,10 +39,21 @@ const Login = () => {
         const user = await response.json();
         setUser(user);
         navigate('/');
+        return;
       }
     } catch (err) {
-      console.error('Guest login error:', err);
+      console.warn('Backend not running, continuing in guest preview mode:', err);
     }
+
+    // Graceful offline fallback so the user can test UI without needing a running backend/database:
+    const fallbackUser: User = {
+      id: 'guest-' + Math.floor(Math.random() * 10000),
+      name: name,
+      token: 'guest-preview-token',
+      isGuest: true,
+    };
+    setUser(fallbackUser);
+    navigate('/');
   };
 
   return (
