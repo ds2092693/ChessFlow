@@ -8,9 +8,6 @@ import {
   BotIcon
 } from 'lucide-react';
 
-const BACKEND_URL =
-  import.meta.env.VITE_APP_BACKEND_URL ?? 'http://localhost:3000';
-
 export const UpperNavItems = [
   {
     title: 'Play Online',
@@ -54,7 +51,7 @@ export const LowerNavItems = [
   {
     title: 'Logout',
     icon: LogOutIcon,
-    href: `${BACKEND_URL}/auth/logout`,
+    href: '/login',
     colorKey: 'accent',
   },
 ];

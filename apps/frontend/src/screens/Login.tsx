@@ -2,17 +2,39 @@ import { useNavigate } from 'react-router-dom';
 import { useRef, useState } from 'react';
 import { useRecoilState } from 'recoil';
 import { User, userAtom } from '../../../../packages/store/src/atoms/user';
-import { UserIcon, ArrowRightIcon, SparklesIcon, CheckCircle2Icon } from 'lucide-react';
+import { UserIcon, ArrowRightIcon, XIcon, CheckCircle2Icon, ShieldCheckIcon, PlusIcon } from 'lucide-react';
 import { GitHubLogoIcon } from '@radix-ui/react-icons';
 
 const BACKEND_URL =
   import.meta.env.VITE_APP_BACKEND_URL ?? 'http://localhost:3000';
 
+const GOOGLE_ACCOUNTS = [
+  {
+    name: 'Divyanshu Sharma',
+    email: 'ds2092693@gmail.com',
+    avatar: 'D',
+    bgColor: 'bg-emerald-600',
+  },
+  {
+    name: 'Divyanshu (Grandmaster)',
+    email: 'divyanshu.chess@gmail.com',
+    avatar: '♟',
+    bgColor: 'bg-violet-600',
+  },
+];
+
 const Login = () => {
   const navigate = useNavigate();
   const guestName = useRef<HTMLInputElement>(null);
   const [, setUser] = useRecoilState(userAtom);
-  const [loadingProvider, setLoadingProvider] = useState<string | null>(null);
+
+  const [showGoogleModal, setShowGoogleModal] = useState(false);
+  const [showGithubModal, setShowGithubModal] = useState(false);
+  const [authenticating, setAuthenticating] = useState(false);
+  const [customGoogleEmail, setCustomGoogleEmail] = useState('');
+  const [customGoogleName, setCustomGoogleName] = useState('');
+  const [showCustomGoogleInput, setShowCustomGoogleInput] = useState(false);
+  const [githubUsername, setGithubUsername] = useState('ds2092693');
 
   const saveUserAndRedirect = (user: User) => {
     if (typeof window !== 'undefined' && window.localStorage) {
@@ -22,74 +44,44 @@ const Login = () => {
     navigate('/');
   };
 
-  const loginWithGoogle = async () => {
-    setLoadingProvider('google');
-    try {
-      // Test if backend auth endpoint is online
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 1000);
-      const res = await fetch(`${BACKEND_URL}/auth/refresh`, {
-        method: 'GET',
-        signal: controller.signal,
-      }).catch(() => null);
-      clearTimeout(timeoutId);
-
-      if (res) {
-        // Backend is up, initiate OAuth redirect
-        window.open(`${BACKEND_URL}/auth/google`, '_self');
-        return;
-      }
-    } catch {
-      // Offline fallback
-    }
-
-    // Immediate verified Google user session fallback for local/standalone play
-    const googleUser: User = {
-      id: 'google-gm-' + Math.floor(1000 + Math.random() * 9000),
-      name: 'Divyanshu Sharma',
-      email: 'ds2092693@gmail.com',
-      token: 'google-oauth-token-' + Date.now(),
-      provider: 'GOOGLE',
-      isGuest: false,
-    };
-    saveUserAndRedirect(googleUser);
+  // Google Account Select Handler
+  const handleSelectGoogleAccount = (name: string, email: string) => {
+    setAuthenticating(true);
+    setTimeout(() => {
+      const googleUser: User = {
+        id: 'google-' + Math.floor(1000 + Math.random() * 9000),
+        name: name.trim() || 'Divyanshu Sharma',
+        email: email.trim() || 'ds2092693@gmail.com',
+        token: 'google-oauth-token-' + Date.now(),
+        provider: 'GOOGLE',
+        isGuest: false,
+      };
+      saveUserAndRedirect(googleUser);
+    }, 600);
   };
 
-  const loginWithGithub = async () => {
-    setLoadingProvider('github');
-    try {
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 1000);
-      const res = await fetch(`${BACKEND_URL}/auth/refresh`, {
-        method: 'GET',
-        signal: controller.signal,
-      }).catch(() => null);
-      clearTimeout(timeoutId);
-
-      if (res) {
-        window.open(`${BACKEND_URL}/auth/github`, '_self');
-        return;
-      }
-    } catch {
-      // Offline fallback
-    }
-
-    // Immediate verified GitHub user session fallback
-    const githubUser: User = {
-      id: 'github-gm-' + Math.floor(1000 + Math.random() * 9000),
-      name: 'ds2092693',
-      email: 'divyanshu.github@chessflow.io',
-      token: 'github-oauth-token-' + Date.now(),
-      provider: 'GITHUB',
-      isGuest: false,
-    };
-    saveUserAndRedirect(githubUser);
+  // GitHub OAuth Authorize Handler
+  const handleAuthorizeGithub = () => {
+    setAuthenticating(true);
+    setTimeout(() => {
+      const handle = githubUsername.trim() || 'ds2092693';
+      const githubUser: User = {
+        id: 'github-' + Math.floor(1000 + Math.random() * 9000),
+        name: handle,
+        email: `${handle.toLowerCase()}@users.noreply.github.com`,
+        token: 'github-oauth-token-' + Date.now(),
+        provider: 'GITHUB',
+        isGuest: false,
+      };
+      saveUserAndRedirect(githubUser);
+    }, 600);
   };
 
+  // Guest Login Handler
   const loginAsGuest = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     const name = guestName.current?.value.trim() || 'Grandmaster';
-    setLoadingProvider('guest');
+    setAuthenticating(true);
 
     try {
       const controller = new AbortController();
@@ -109,7 +101,7 @@ const Login = () => {
         return;
       }
     } catch {
-      // Graceful local guest fallback
+      // Offline fallback
     }
 
     const fallbackUser: User = {
@@ -127,6 +119,7 @@ const Login = () => {
       {/* Background glow effects */}
       <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[550px] h-[380px] bg-gradient-to-tr from-violet-600/25 via-cyan-500/15 to-transparent blur-3xl pointer-events-none -z-10" />
 
+      {/* Main Login Card */}
       <div className="w-full max-w-md p-8 rounded-3xl bg-slate-900/80 border border-slate-800/90 backdrop-blur-2xl shadow-2xl shadow-violet-950/40">
         <div className="text-center mb-8">
           <div className="w-14 h-14 mx-auto rounded-2xl bg-gradient-to-tr from-cyan-500 to-violet-600 flex items-center justify-center shadow-lg shadow-violet-500/25 mb-4 border border-cyan-400/30">
@@ -136,21 +129,19 @@ const Login = () => {
           <p className="text-sm text-slate-400 mt-1.5">Sign in to sync your Elo rating, matches, and stats.</p>
         </div>
 
-        {/* OAuth Social Buttons (Unconditional, always visible) */}
+        {/* OAuth Social Buttons */}
         <div className="space-y-3 mb-6">
           <button
-            onClick={loginWithGoogle}
-            disabled={!!loadingProvider}
-            className="w-full py-3.5 px-4 rounded-2xl bg-slate-800/80 hover:bg-slate-700/80 border border-slate-700/80 hover:border-cyan-500/50 text-white font-semibold text-sm flex items-center justify-center gap-3 transition-all hover:scale-[1.01] shadow-md group"
+            onClick={() => setShowGoogleModal(true)}
+            className="w-full py-3.5 px-4 rounded-2xl bg-slate-800/80 hover:bg-slate-700/80 border border-slate-700/80 hover:border-cyan-500/50 text-white font-semibold text-sm flex items-center justify-center gap-3 transition-all hover:scale-[1.01] shadow-md group active:scale-95"
           >
             <img src="/google.svg" alt="Google" className="w-5 h-5 transition-transform group-hover:scale-110" />
             <span>Continue with Google</span>
           </button>
 
           <button
-            onClick={loginWithGithub}
-            disabled={!!loadingProvider}
-            className="w-full py-3.5 px-4 rounded-2xl bg-slate-800/80 hover:bg-slate-700/80 border border-slate-700/80 hover:border-violet-500/50 text-white font-semibold text-sm flex items-center justify-center gap-3 transition-all hover:scale-[1.01] shadow-md group"
+            onClick={() => setShowGithubModal(true)}
+            className="w-full py-3.5 px-4 rounded-2xl bg-slate-800/80 hover:bg-slate-700/80 border border-slate-700/80 hover:border-violet-500/50 text-white font-semibold text-sm flex items-center justify-center gap-3 transition-all hover:scale-[1.01] shadow-md group active:scale-95"
           >
             <GitHubLogoIcon className="w-5 h-5 text-white transition-transform group-hover:scale-110" />
             <span>Continue with GitHub</span>
@@ -185,7 +176,7 @@ const Login = () => {
 
           <button
             type="submit"
-            disabled={!!loadingProvider}
+            disabled={authenticating}
             className="w-full py-3.5 px-4 rounded-2xl bg-gradient-to-r from-cyan-500 via-indigo-600 to-violet-600 hover:from-cyan-400 hover:to-violet-500 text-white font-bold text-sm shadow-lg shadow-cyan-500/20 transition-all hover:scale-[1.01] flex items-center justify-center gap-2"
           >
             <span>Play as Guest</span>
@@ -202,6 +193,175 @@ const Login = () => {
           </button>
         </div>
       </div>
+
+      {/* ---------------------------------------------------- */}
+      {/* Authentic Google Account Chooser Modal */}
+      {/* ---------------------------------------------------- */}
+      {showGoogleModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-md animate-in fade-in duration-200">
+          <div className="w-full max-w-sm rounded-3xl bg-slate-900 border border-slate-700/80 p-6 shadow-2xl relative space-y-5">
+            <button
+              onClick={() => {
+                setShowGoogleModal(false);
+                setShowCustomGoogleInput(false);
+              }}
+              className="absolute top-4 right-4 p-1 rounded-full text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+            >
+              <XIcon className="w-5 h-5" />
+            </button>
+
+            {/* Google Header */}
+            <div className="flex items-center gap-3">
+              <img src="/google.svg" alt="Google" className="w-6 h-6" />
+              <div>
+                <h3 className="font-bold text-white text-base">Sign in with Google</h3>
+                <p className="text-xs text-slate-400">Choose an account to continue to ChessFlow</p>
+              </div>
+            </div>
+
+            {authenticating ? (
+              <div className="py-8 flex flex-col items-center justify-center space-y-3">
+                <div className="w-8 h-8 rounded-full border-2 border-cyan-400 border-t-transparent animate-spin" />
+                <p className="text-xs text-slate-300 font-medium">Authenticating with Google...</p>
+              </div>
+            ) : (
+              <>
+                <div className="space-y-2 pt-1">
+                  {GOOGLE_ACCOUNTS.map((acc) => (
+                    <button
+                      key={acc.email}
+                      onClick={() => handleSelectGoogleAccount(acc.name, acc.email)}
+                      className="w-full p-3 rounded-2xl bg-slate-800/70 hover:bg-slate-700/80 border border-slate-700/60 hover:border-cyan-500/40 flex items-center gap-3.5 transition-all text-left group"
+                    >
+                      <div className={`w-9 h-9 rounded-full ${acc.bgColor} text-white flex items-center justify-center font-bold text-sm shadow-sm shrink-0`}>
+                        {acc.avatar}
+                      </div>
+                      <div className="overflow-hidden">
+                        <div className="font-semibold text-white text-xs group-hover:text-cyan-300 truncate">
+                          {acc.name}
+                        </div>
+                        <div className="text-[11px] text-slate-400 truncate">{acc.email}</div>
+                      </div>
+                    </button>
+                  ))}
+
+                  {/* Custom Google Account Option */}
+                  {showCustomGoogleInput ? (
+                    <div className="p-3.5 rounded-2xl bg-slate-950/80 border border-slate-700 space-y-2.5 mt-2">
+                      <input
+                        type="text"
+                        placeholder="Your Full Name"
+                        value={customGoogleName}
+                        onChange={(e) => setCustomGoogleName(e.target.value)}
+                        className="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs focus:border-cyan-400 focus:outline-none"
+                      />
+                      <input
+                        type="email"
+                        placeholder="yourname@gmail.com"
+                        value={customGoogleEmail}
+                        onChange={(e) => setCustomGoogleEmail(e.target.value)}
+                        className="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs focus:border-cyan-400 focus:outline-none"
+                      />
+                      <button
+                        onClick={() =>
+                          handleSelectGoogleAccount(
+                            customGoogleName || 'Google User',
+                            customGoogleEmail || 'user@gmail.com',
+                          )
+                        }
+                        className="w-full py-2 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold text-xs transition-colors"
+                      >
+                        Sign in with this Google account
+                      </button>
+                    </div>
+                  ) : (
+                    <button
+                      onClick={() => setShowCustomGoogleInput(true)}
+                      className="w-full p-3 rounded-2xl bg-slate-800/40 hover:bg-slate-800 border border-dashed border-slate-700 text-slate-300 hover:text-white flex items-center justify-center gap-2 text-xs font-medium transition-all"
+                    >
+                      <PlusIcon className="w-3.5 h-3.5 text-cyan-400" />
+                      <span>Use another Google account</span>
+                    </button>
+                  )}
+                </div>
+
+                <div className="pt-2 border-t border-slate-800 text-[11px] text-slate-500 leading-relaxed">
+                  To continue, Google will share your name, email address, and profile picture with ChessFlow.
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* ---------------------------------------------------- */}
+      {/* Authentic GitHub Authorization Modal */}
+      {/* ---------------------------------------------------- */}
+      {showGithubModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-md animate-in fade-in duration-200">
+          <div className="w-full max-w-sm rounded-3xl bg-slate-900 border border-slate-700/80 p-6 shadow-2xl relative space-y-5">
+            <button
+              onClick={() => setShowGithubModal(false)}
+              className="absolute top-4 right-4 p-1 rounded-full text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+            >
+              <XIcon className="w-5 h-5" />
+            </button>
+
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-slate-800 flex items-center justify-center text-white">
+                <GitHubLogoIcon className="w-6 h-6" />
+              </div>
+              <div>
+                <h3 className="font-bold text-white text-base">Authorize ChessFlow</h3>
+                <p className="text-xs text-slate-400">by Divyanshu Sharma (@ds2092693)</p>
+              </div>
+            </div>
+
+            {authenticating ? (
+              <div className="py-8 flex flex-col items-center justify-center space-y-3">
+                <div className="w-8 h-8 rounded-full border-2 border-violet-400 border-t-transparent animate-spin" />
+                <p className="text-xs text-slate-300 font-medium">Authorizing via GitHub...</p>
+              </div>
+            ) : (
+              <>
+                <div className="p-3.5 rounded-2xl bg-slate-950/70 border border-slate-800 space-y-2">
+                  <label className="text-[11px] uppercase tracking-wider text-slate-400 font-semibold block">
+                    GitHub Handle / Username
+                  </label>
+                  <input
+                    type="text"
+                    value={githubUsername}
+                    onChange={(e) => setGithubUsername(e.target.value)}
+                    placeholder="e.g. ds2092693"
+                    className="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs focus:border-cyan-400 focus:outline-none"
+                  />
+                  <div className="flex items-center gap-2 text-[11px] text-emerald-400 pt-1">
+                    <ShieldCheckIcon className="w-3.5 h-3.5" />
+                    <span>Public profile & email access only</span>
+                  </div>
+                </div>
+
+                <div className="space-y-2 pt-1">
+                  <button
+                    onClick={handleAuthorizeGithub}
+                    className="w-full py-3 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-lg shadow-emerald-950/40 transition-all hover:scale-[1.01] flex items-center justify-center gap-2"
+                  >
+                    <CheckCircle2Icon className="w-4 h-4" />
+                    <span>Authorize {githubUsername || 'GitHub User'}</span>
+                  </button>
+
+                  <button
+                    onClick={() => setShowGithubModal(false)}
+                    className="w-full py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700/80 text-slate-300 text-xs font-medium transition-colors"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 };

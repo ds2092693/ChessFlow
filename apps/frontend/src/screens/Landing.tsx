@@ -1,6 +1,8 @@
 import { PlayCard } from '@/components/Card';
 import { Footer } from '@/components/Footer';
 import { useNavigate } from 'react-router-dom';
+import { useUser } from '@repo/store/src/hooks/useUser';
+import { LogInIcon, UserIcon } from 'lucide-react';
 import { 
   ZapIcon, 
   CpuIcon, 
@@ -15,9 +17,66 @@ import { GitHubLogoIcon, LinkedInLogoIcon } from '@radix-ui/react-icons';
 
 export const Landing = () => {
   const navigate = useNavigate();
+  const user = useUser();
 
   return (
-    <div className="flex flex-col space-y-24">
+    <div className="flex flex-col space-y-16">
+      {/* Top Welcome / Sign-in Banner at start */}
+      {!user ? (
+        <div className="p-4 rounded-3xl bg-gradient-to-r from-cyan-950/60 via-slate-900/80 to-violet-950/60 border border-cyan-500/30 backdrop-blur-xl flex flex-col sm:flex-row items-center justify-between gap-4 shadow-xl">
+          <div className="flex items-center gap-3.5">
+            <div className="w-11 h-11 rounded-2xl bg-cyan-500/20 border border-cyan-400/40 flex items-center justify-center text-cyan-400 shrink-0">
+              <CrownIcon className="w-6 h-6" />
+            </div>
+            <div>
+              <div className="font-bold text-white text-sm">Join the ChessFlow Grandmaster Arena</div>
+              <div className="text-xs text-slate-400">Sign in with Google, GitHub or Guest to track your Elo rating and rank globally.</div>
+            </div>
+          </div>
+          <button
+            onClick={() => navigate("/login")}
+            className="px-6 py-2.5 rounded-2xl bg-gradient-to-r from-cyan-500 to-violet-600 hover:from-cyan-400 hover:to-violet-500 text-white font-bold text-xs shadow-lg shadow-cyan-500/25 transition-all hover:scale-105 shrink-0 flex items-center gap-2"
+          >
+            <LogInIcon className="w-3.5 h-3.5" />
+            <span>Sign In / Register</span>
+          </button>
+        </div>
+      ) : (
+        <div className="p-4 rounded-3xl bg-slate-900/80 border border-slate-800/90 backdrop-blur-xl flex flex-col sm:flex-row items-center justify-between gap-4 shadow-lg">
+          <div className="flex items-center gap-3.5">
+            <div className="w-11 h-11 rounded-2xl bg-gradient-to-tr from-cyan-500 to-violet-600 text-white font-black text-base flex items-center justify-center shadow-md">
+              {user.name.charAt(0).toUpperCase()}
+            </div>
+            <div>
+              <div className="font-bold text-white text-sm flex items-center gap-2">
+                <span>Welcome back, {user.name}</span>
+                {user.provider && (
+                  <span className="text-[10px] uppercase font-bold px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">
+                    {user.provider}
+                  </span>
+                )}
+              </div>
+              <div className="text-xs text-slate-400 font-mono mt-0.5">Player ID: {user.id} • Grandmaster Tier</div>
+            </div>
+          </div>
+          <div className="flex items-center gap-2.5">
+            <button
+              onClick={() => navigate("/profile")}
+              className="px-4 py-2 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-200 text-xs font-semibold transition-colors flex items-center gap-1.5"
+            >
+              <UserIcon className="w-3.5 h-3.5" />
+              <span>Profile</span>
+            </button>
+            <button
+              onClick={() => navigate("/game/computer")}
+              className="px-4 py-2 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 text-xs font-bold transition-all shadow-md hover:scale-105 flex items-center gap-1.5"
+            >
+              <CpuIcon className="w-3.5 h-3.5" />
+              <span>Play AI</span>
+            </button>
+          </div>
+        </div>
+      )}
       {/* Hero Section */}
       <section className="relative pt-4 md:pt-8">
         {/* Subtle background glow */}
