@@ -14,8 +14,10 @@ export function initPassport() {
   const {
     GOOGLE_CLIENT_ID,
     GOOGLE_CLIENT_SECRET,
+    GOOGLE_CALLBACK_URL,
     GITHUB_CLIENT_ID,
     GITHUB_CLIENT_SECRET,
+    GITHUB_CALLBACK_URL,
   } = process.env;
 
   if (GOOGLE_CLIENT_ID && GOOGLE_CLIENT_SECRET) {
@@ -24,7 +26,7 @@ export function initPassport() {
         {
           clientID: GOOGLE_CLIENT_ID,
           clientSecret: GOOGLE_CLIENT_SECRET,
-          callbackURL: '/auth/google/callback',
+          callbackURL: GOOGLE_CALLBACK_URL || 'http://localhost:3000/auth/google/callback',
         },
         async (_accessToken, _refreshToken, profile, done) => {
           try {
@@ -32,18 +34,57 @@ export function initPassport() {
             if (!email) {
               return done(new Error('Google account has no email'));
             }
-            const user = await db.user.upsert({
-              create: { email, name: profile.displayName, provider: 'GOOGLE' },
-              update: { name: profile.displayName },
-              where: { email },
+
+            const rawUsername = profile.displayName
+              ? profile.displayName.toLowerCase().replace(/[^a-z0-9]/g, '')
+              : `user${Date.now()}`;
+            const username = rawUsername.length > 2 ? rawUsername : `user${Date.now()}`;
+
+            let user = await db.user.findFirst({
+              where: {
+                OR: [{ email }, { username }],
+              },
             });
+
+            if (!user) {
+              user = await db.user.create({
+                data: {
+                  email,
+                  name: profile.displayName || 'Google Player',
+                  username,
+                  provider: 'GOOGLE',
+                  playerRating: {
+                    create: {
+                      currentRating: 1200,
+                      peakRating: 1200,
+                      gamesPlayed: 0,
+                      wins: 0,
+                      losses: 0,
+                      draws: 0,
+                    },
+                  },
+                },
+              });
+            } else {
+              user = await db.user.update({
+                where: { id: user.id },
+                data: {
+                  name: profile.displayName || user.name,
+                  lastLogin: new Date(),
+                  provider: 'GOOGLE',
+                },
+              });
+            }
+
             done(null, user);
           } catch (err) {
+            console.error('Google passport strategy error:', err);
             done(err as Error);
           }
         },
       ),
     );
+    console.log('✅ Real Google OAuth strategy registered successfully!');
   } else {
     console.warn('Google OAuth disabled: GOOGLE_CLIENT_ID / GOOGLE_CLIENT_SECRET not set');
   }
@@ -54,7 +95,7 @@ export function initPassport() {
         {
           clientID: GITHUB_CLIENT_ID,
           clientSecret: GITHUB_CLIENT_SECRET,
-          callbackURL: '/auth/github/callback',
+          callbackURL: GITHUB_CALLBACK_URL || 'http://localhost:3000/auth/github/callback',
         },
         async (accessToken: string, _refreshToken: string, profile: any, done: any) => {
           try {
@@ -62,24 +103,53 @@ export function initPassport() {
               headers: { Authorization: `token ${accessToken}` },
             });
             const emails = (await res.json()) as GithubEmail[];
-            const primary = emails.find((e) => e.primary)?.email;
-            if (!primary) {
-              return done(new Error('GitHub account has no primary email'));
-            }
-            const user = await db.user.upsert({
-              create: { email: primary, name: profile.displayName, provider: 'GITHUB' },
-              update: { name: profile.displayName },
-              where: { email: primary },
+            const primary = emails.find((e) => e.primary)?.email || `${profile.username}@github.com`;
+
+            let user = await db.user.findFirst({
+              where: {
+                OR: [{ email: primary }, { username: profile.username }],
+              },
             });
+
+            if (!user) {
+              user = await db.user.create({
+                data: {
+                  email: primary,
+                  name: profile.displayName || profile.username,
+                  username: profile.username || `gh_${Date.now()}`,
+                  provider: 'GITHUB',
+                  playerRating: {
+                    create: {
+                      currentRating: 1200,
+                      peakRating: 1200,
+                      gamesPlayed: 0,
+                      wins: 0,
+                      losses: 0,
+                      draws: 0,
+                    },
+                  },
+                },
+              });
+            } else {
+              user = await db.user.update({
+                where: { id: user.id },
+                data: {
+                  name: profile.displayName || user.name,
+                  lastLogin: new Date(),
+                  provider: 'GITHUB',
+                },
+              });
+            }
+
             done(null, user);
           } catch (err) {
+            console.error('GitHub passport strategy error:', err);
             done(err);
           }
         },
       ),
     );
-  } else {
-    console.warn('GitHub OAuth disabled: GITHUB_CLIENT_ID / GITHUB_CLIENT_SECRET not set');
+    console.log('✅ Real GitHub OAuth strategy registered successfully!');
   }
 
   passport.serializeUser((user: any, cb) => {

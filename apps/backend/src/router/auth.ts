@@ -192,10 +192,16 @@ router.get('/google', async (req: Request, res: Response, next: NextFunction) =>
 
 router.get(
   '/google/callback',
-  passport.authenticate('google', {
-    successRedirect: CLIENT_URL,
-    failureRedirect: '/login/failed',
-  }),
+  passport.authenticate('google', { failureRedirect: '/login/failed' }),
+  (req: Request, res: Response) => {
+    const user = req.user as any;
+    const token = jwt.sign(
+      { userId: user.id, name: user.name, isGuest: false },
+      JWT_SECRET!,
+    );
+    res.cookie('guest', token, cookieOptions);
+    res.redirect(`${CLIENT_URL}?auth=success&token=${token}&userId=${user.id}&name=${encodeURIComponent(user.name || '')}&provider=GOOGLE`);
+  },
 );
 
 // GitHub OAuth endpoint
@@ -255,10 +261,16 @@ router.get('/github', async (req: Request, res: Response, next: NextFunction) =>
 
 router.get(
   '/github/callback',
-  passport.authenticate('github', {
-    successRedirect: CLIENT_URL,
-    failureRedirect: '/login/failed',
-  }),
+  passport.authenticate('github', { failureRedirect: '/login/failed' }),
+  (req: Request, res: Response) => {
+    const user = req.user as any;
+    const token = jwt.sign(
+      { userId: user.id, name: user.name, isGuest: false },
+      JWT_SECRET!,
+    );
+    res.cookie('guest', token, cookieOptions);
+    res.redirect(`${CLIENT_URL}?auth=success&token=${token}&userId=${user.id}&name=${encodeURIComponent(user.name || '')}&provider=GITHUB`);
+  },
 );
 
 export default router;
