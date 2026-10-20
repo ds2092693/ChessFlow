@@ -28,4 +28,5 @@ coverage/
 .DS_Store
 Thumbs.db
 
-.turbo/
+.turbo/*.dylib.node
+*.db-journal

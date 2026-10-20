@@ -129,7 +129,7 @@ export const Leaderboard = () => {
     (async () => {
       try {
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 1200);
+        const timeoutId = setTimeout(() => controller.abort(), 4000);
 
         const res = await fetch(`${BACKEND_URL}/api/leaderboard?limit=50`, {
           credentials: 'include',

@@ -1,9 +1,9 @@
 import './App.css';
 import './themes.css';
 
-import { Suspense } from 'react';
-import { BrowserRouter, Route, Routes, useParams } from 'react-router-dom';
-import { RecoilRoot } from 'recoil';
+import { Suspense, useEffect } from 'react';
+import { BrowserRouter, Route, Routes, useParams, useLocation, useNavigate } from 'react-router-dom';
+import { RecoilRoot, useRecoilState } from 'recoil';
 
 import { Loader } from './components/Loader';
 import { Layout } from './layout';
@@ -20,6 +20,7 @@ import { Profile } from './screens/Profile';
 import Leaderboard from './components/Leaderboard';
 import GameHistory from './components/GameHistory';
 import PlayerStats from './components/PlayerStats';
+import { userAtom, User } from '@repo/store/src/atoms/user';
 
 function GameHistoryRoute() {
   const { userId } = useParams<{ userId: string }>();
@@ -31,6 +32,37 @@ function PlayerStatsRoute() {
   return <PlayerStats userId={userId ?? ''} />;
 }
 
+function AuthSync() {
+  const [, setUser] = useRecoilState(userAtom);
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    if (params.get('auth') === 'success') {
+      const token = params.get('token');
+      const userId = params.get('userId');
+      const name = params.get('name') || 'Grandmaster';
+      const provider = params.get('provider') || 'GOOGLE';
+
+      if (token && userId) {
+        const u: User = {
+          id: userId,
+          name,
+          token,
+          provider,
+          isGuest: false,
+        };
+        localStorage.setItem('chessflow_user', JSON.stringify(u));
+        setUser(u);
+        navigate('/', { replace: true });
+      }
+    }
+  }, [location.search, navigate, setUser]);
+
+  return null;
+}
+
 function App() {
   return (
     <div className="min-h-screen bg-bgMain text-textMain">
@@ -38,6 +70,7 @@ function App() {
         <Suspense fallback={<Loader />}>
           <ThemesProvider>
             <BrowserRouter>
+              <AuthSync />
               <Routes>
                 <Route path="/" element={<Layout><Landing /></Layout>} />
                 <Route path="/login" element={<Login />} />

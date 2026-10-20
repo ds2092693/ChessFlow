@@ -3,7 +3,7 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "sqlite"
   url      = env("DATABASE_URL")
 }
 
@@ -12,7 +12,7 @@ model User {
   username      String?   @unique
   name          String?
   email         String   @unique
-  provider      AuthProvider
+  provider      String
   password      String?
   rating        Int      @default(1200)
   gamesAsWhite  Game[]   @relation("GamesAsWhite")
@@ -49,9 +49,9 @@ model Game {
   blackPlayerId   String
   whitePlayer     User       @relation("GamesAsWhite", fields: [whitePlayerId], references: [id])
   blackPlayer     User       @relation("GamesAsBlack", fields: [blackPlayerId], references: [id])
-  status          GameStatus
-  result          GameResult?
-  timeControl     TimeControl
+  status          String
+  result          String?
+  timeControl     String
   startingFen     String     @default("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")
   currentFen      String?
   startAt         DateTime   @default(now())
@@ -90,30 +90,6 @@ model Move {
   @@index([gameId])
 }
 
-enum GameStatus {
-  IN_PROGRESS
-  COMPLETED
-  ABANDONED
-  TIME_UP
-  PLAYER_EXIT
-}
 
-enum GameResult {
-  WHITE_WINS
-  BLACK_WINS
-  DRAW
-}
 
-enum TimeControl {
-  CLASSICAL
-  RAPID
-  BLITZ
-  BULLET
-}
 
-enum AuthProvider {
-  EMAIL
-  GOOGLE
-  GITHUB
-  GUEST
-}
