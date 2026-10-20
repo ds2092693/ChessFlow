@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
-import WhiteKing from '../../public/wk.png';
-import BlackKing from '../../public/bk.png';
 import { GameResult, Result } from '@/screens/Game';
+import { TrophyIcon, XIcon } from 'lucide-react';
+
+const WhiteKing = '/wk.png';
+const BlackKing = '/bk.png';
 
 interface ModalProps {
   blackPlayer?: { id: string; name: string };
@@ -16,37 +18,48 @@ const GameEndModal: React.FC<ModalProps> = ({
 }) => {
   const [isOpen, setIsOpen] = useState(true);
 
+  if (!isOpen) return null;
+
   const closeModal = () => {
     setIsOpen(false);
   };
 
+  const isWhiteWinner = gameResult.result === Result.WHITE_WINS;
+  const isBlackWinner = gameResult.result === Result.BLACK_WINS;
+  const isDraw = gameResult.result === Result.DRAW;
+
   const PlayerDisplay = ({
     player,
-    gameResult,
     isWhite,
+    isWinner,
   }: {
     player?: { id: string; name: string };
-    gameResult: Result;
     isWhite: boolean;
+    isWinner: boolean;
   }) => {
     const imageSrc = isWhite ? WhiteKing : BlackKing;
-    const borderColor =
-      gameResult === (isWhite ? Result.WHITE_WINS : Result.BLACK_WINS)
-        ? 'border-green-400'
-        : 'border-red-400';
 
     return (
-      <div className="flex flex-col items-center">
-        <div className={`border-4 rounded-full p-2 ${borderColor}`}>
+      <div className="flex flex-col items-center space-y-2">
+        <div
+          className={`w-16 h-16 rounded-2xl p-2 flex items-center justify-center transition-all ${
+            isWinner
+              ? 'bg-gradient-to-tr from-amber-400/20 to-emerald-400/20 border-2 border-emerald-400 shadow-lg shadow-emerald-500/20 scale-105'
+              : 'bg-slate-900 border border-slate-800 opacity-60'
+          }`}
+        >
           <img
             src={imageSrc}
             alt={`${isWhite ? 'White' : 'Black'} King`}
-            className="w-10 h-10"
+            className="w-10 h-10 object-contain filter drop-shadow"
           />
         </div>
-        <div className="text-center text-xm p-2">
-          <p className="text-white truncate w-24" title={getPlayerName(player)}>
-            {getPlayerName(player)}
+        <div className="text-center">
+          <p className="text-white text-xs font-bold truncate w-24">
+            {player?.name ?? 'Player'}
+          </p>
+          <p className="text-[10px] text-slate-400">
+            {isWhite ? 'White (♔)' : 'Black (♚)'}
           </p>
         </div>
       </div>
@@ -56,50 +69,67 @@ const GameEndModal: React.FC<ModalProps> = ({
   const getWinnerMessage = (result: Result) => {
     switch (result) {
       case Result.BLACK_WINS:
-        return 'Black Wins!';
+        return 'Black Claimed Victory!';
       case Result.WHITE_WINS:
-        return 'White Wins!';
+        return 'White Claimed Victory!';
       default:
-        return "It's a Draw";
+        return "Match Drawn";
     }
   };
 
-  const getPlayerName = (player: { id: string; name: string } | undefined) => {
-    return player ? player.name : 'Unknown';
-  };
-
   return (
-    <div>
-      {isOpen && (
-        <div className="fixed inset-0 flex items-center justify-center z-50 rounded">
-          <div className="absolute inset-0 bg-gray-900 opacity-75"></div>
-          <div className="relative rounded-lg shadow-lg bg-gray-800 w-96">
-            <div className="px-6 py-8 items-center self-center m-auto">
-              <div className="m-auto mb-6">
-                <h2 className={`text-4xl font-bold mb-2 text-yellow-400 text-center text-wrap`}>
-                 {getWinnerMessage(gameResult.result)}  
-                </h2>
-              </div>
-              <div className="m-auto mb-6">
-                <p className="text-xl text-white text-center">by {gameResult.by}</p>
-              </div>
-              <div className="flex flex-row justify-between items-center bg-gray-700 rounded-lg px-4 py-6">
-                <PlayerDisplay isWhite={true} player={whitePlayer} gameResult={gameResult.result} />
-                <div className="text-white text-2xl font-bold">vs</div>
-                <PlayerDisplay isWhite={false} player={blackPlayer} gameResult={gameResult.result} />
-              </div>
-            </div>
-            <div className="px-6 py-4 bg-gray-900 text-right rounded-b-lg">
-              <button
-                className="px-6 py-3 text-white bg-red-600 rounded-lg hover:bg-red-700 focus:outline-none"
-                onClick={closeModal}
-              >
-                Close
-              </button>
-            </div>
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      {/* Backdrop */}
+      <div
+        className="absolute inset-0 bg-slate-950/80 backdrop-blur-md"
+        onClick={closeModal}
+      />
+
+      {/* Modal Dialog */}
+      <div className="relative w-full max-w-md p-6 sm:p-8 rounded-3xl bg-slate-900/90 border border-slate-800 shadow-2xl shadow-indigo-950/50 text-center space-y-6 animate-in zoom-in-95 duration-200">
+        <button
+          onClick={closeModal}
+          className="absolute top-5 right-5 p-2 rounded-xl text-slate-400 hover:text-white bg-slate-800/60 hover:bg-slate-800"
+        >
+          <XIcon className="w-4 h-4" />
+        </button>
+
+        <div className="space-y-2">
+          <div className="w-14 h-14 mx-auto rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400">
+            <TrophyIcon className="w-7 h-7" />
           </div>
+          <h2 className="text-2xl font-black text-white tracking-tight">
+            {getWinnerMessage(gameResult.result)}
+          </h2>
+          <p className="text-xs text-slate-400 font-mono">
+            Outcome decided by {gameResult.by}
+          </p>
         </div>
-      )}
+
+        {/* Players Showcase */}
+        <div className="p-4 rounded-2xl bg-slate-950/80 border border-slate-800/80 flex items-center justify-around">
+          <PlayerDisplay
+            isWhite={true}
+            player={whitePlayer}
+            isWinner={isWhiteWinner}
+          />
+          <div className="font-mono text-slate-600 font-bold text-lg">VS</div>
+          <PlayerDisplay
+            isWhite={false}
+            player={blackPlayer}
+            isWinner={isBlackWinner}
+          />
+        </div>
+
+        <div>
+          <button
+            onClick={closeModal}
+            className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-cyan-500 to-violet-600 hover:from-cyan-400 hover:to-violet-500 text-white font-bold text-sm shadow-lg shadow-cyan-500/20 transition-all hover:scale-[1.01]"
+          >
+            Review Board Position
+          </button>
+        </div>
+      </div>
     </div>
   );
 };
