@@ -1,3 +1,4 @@
+import { BACKEND_URL } from '../config/urls';
 import { cn } from '@/lib/utils';
 import { useSidebar } from '@/hooks/useSidebar';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
@@ -6,8 +7,7 @@ import { useUser } from '@repo/store/src/hooks/useUser';
 import { useSetRecoilState } from 'recoil';
 import { userAtom } from '@repo/store/src/atoms/user';
 
-const BACKEND_URL =
-  import.meta.env.VITE_APP_BACKEND_URL ?? 'http://localhost:3000';
+
 
 export interface NavItem {
   title: string;

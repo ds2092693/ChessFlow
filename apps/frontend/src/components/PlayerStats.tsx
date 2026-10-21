@@ -1,8 +1,8 @@
+import { BACKEND_URL } from '../config/urls';
 import { useEffect, useState } from 'react';
 import { TrophyIcon, FlameIcon, SwordsIcon } from 'lucide-react';
 
-const BACKEND_URL =
-  import.meta.env.VITE_APP_BACKEND_URL ?? 'http://localhost:3000';
+
 
 interface PlayerStatsProps {
   userId: string;

@@ -1,3 +1,4 @@
+import { BACKEND_URL } from '../config/urls';
 import { useNavigate } from 'react-router-dom';
 import { useRef, useState } from 'react';
 import { useRecoilState } from 'recoil';
@@ -5,8 +6,7 @@ import { User, userAtom } from '../../../../packages/store/src/atoms/user';
 import { UserIcon, ArrowRightIcon } from 'lucide-react';
 import { GitHubLogoIcon } from '@radix-ui/react-icons';
 
-const BACKEND_URL =
-  import.meta.env.VITE_APP_BACKEND_URL ?? 'http://localhost:3000';
+
 
 const Login = () => {
   const navigate = useNavigate();

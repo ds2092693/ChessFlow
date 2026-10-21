@@ -29,16 +29,11 @@ services:
     buildCommand: npm install && npx turbo run build --filter=backend
     startCommand: node apps/backend/dist/index.js
     envVars:
+      - fromGroup: chessflow-secrets
       - key: NODE_ENV
         value: production
       - key: PORT
         value: 10000
-      - key: JWT_SECRET
-        generateValue: true
-      - key: COOKIE_SECRET
-        generateValue: true
-      - key: DATABASE_URL
-        value: file:./packages/db/prisma/dev.db
 
   # 3. WebSocket Realtime Engine
   - type: web
@@ -48,14 +43,18 @@ services:
     buildCommand: npm install && npx turbo run build --filter=ws
     startCommand: node apps/ws/dist/index.js
     envVars:
+      - fromGroup: chessflow-secrets
       - key: NODE_ENV
         value: production
       - key: PORT
         value: 10000
+
+envVarGroups:
+  - name: chessflow-secrets
+    envVars:
       - key: JWT_SECRET
-        fromService:
-          type: web
-          name: chessflow-backend
-          property: envVar:JWT_SECRET
+        generateValue: true
+      - key: COOKIE_SECRET
+        generateValue: true
       - key: DATABASE_URL
         value: file:./packages/db/prisma/dev.db

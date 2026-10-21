@@ -1,3 +1,4 @@
+import { BACKEND_URL } from '../config/urls';
 import { useEffect, useState } from 'react';
 import GameHistory from '@/components/GameHistory';
 import PlayerStats from '@/components/PlayerStats';
@@ -5,8 +6,7 @@ import { User } from '@repo/store/src/atoms/user';
 import { UserIcon, ShieldIcon, HistoryIcon, BarChart3Icon, LogInIcon } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
-const BACKEND_URL =
-  import.meta.env.VITE_APP_BACKEND_URL ?? 'http://localhost:3000';
+
 
 export function Profile() {
   const [user, setUser] = useState<User | null>(null);

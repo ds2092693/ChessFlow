@@ -1,10 +1,10 @@
+import { BACKEND_URL } from '../config/urls';
 import { useEffect, useState } from 'react';
 import { TrophyIcon, UserCheckIcon, ShieldCheckIcon, SparklesIcon, Users } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useUser } from '@repo/store/src/hooks/useUser';
 
-const BACKEND_URL =
-  import.meta.env.VITE_APP_BACKEND_URL ?? 'http://localhost:3000';
+
 
 export interface LeaderboardEntry {
   id: string;
