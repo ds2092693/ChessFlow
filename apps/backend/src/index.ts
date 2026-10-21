@@ -15,6 +15,7 @@ import leaderboardRoutes from './router/leaderboard';
 import gameHistoryRoutes from './router/gameHistory';
 import { initPassport } from './passport';
 import { COOKIE_MAX_AGE } from './consts';
+import { db } from './db';
 
 // Safety net: log stray errors instead of letting one bad request crash the server.
 process.on('unhandledRejection', (reason) => {
@@ -112,7 +113,14 @@ app.use(
   }),
 );
 
-app.get('/health', (_req, res) => res.json({ ok: true }));
+app.get('/health', async (_req, res) => {
+  try {
+    const userCount = await db.user.count();
+    res.json({ ok: true, users: userCount, status: 'database_connected' });
+  } catch (err: any) {
+    res.json({ ok: true, status: 'database_error', error: err.message });
+  }
+});
 
 app.use('/api/leaderboard', leaderboardRoutes);
 app.use('/api/games', gameHistoryRoutes);
