@@ -28,7 +28,13 @@ const COOKIE_SECRET = process.env.COOKIE_SECRET || 'chessflow-secure-cookie-secr
 
 const allowedOrigins = process.env.ALLOWED_ORIGINS
   ? process.env.ALLOWED_ORIGINS.split(',').map((o) => o.trim())
-  : ['http://localhost:5173'];
+  : [
+      'http://localhost:5173',
+      'http://localhost:3000',
+      'https://chessflow-px48.vercel.app',
+      'https://chessflow-backend.onrender.com',
+      'https://chessflow-ws.onrender.com',
+    ];
 
 const isProd = process.env.NODE_ENV === 'production';
 
@@ -45,7 +51,9 @@ if (isProd) {
   app.set('trust proxy', 1);
 }
 
-app.use(helmet());
+app.use(helmet({
+  crossOriginResourcePolicy: false,
+}));
 // Cap request bodies — every endpoint only ever receives small JSON payloads.
 app.use(express.json({ limit: '100kb' }));
 app.use(cookieParser());
@@ -77,8 +85,29 @@ if (oauthEnabled) {
 
 app.use(
   cors({
-    origin: allowedOrigins,
-    methods: 'GET,POST,PUT,DELETE',
+    origin: (origin, callback) => {
+      // Allow requests with no origin (like mobile apps, curl, or server-to-server)
+      if (!origin) return callback(null, true);
+      // Allow localhost on any port
+      if (/^http:\/\/localhost(:\d+)?$/.test(origin) || /^http:\/\/127\.0\.0\.1(:\d+)?$/.test(origin)) {
+        return callback(null, true);
+      }
+      // Allow Vercel preview & production deployments
+      if (
+        origin.endsWith('.vercel.app') ||
+        origin.includes('chessflow') ||
+        origin.endsWith('.onrender.com')
+      ) {
+        return callback(null, true);
+      }
+      // Check explicit allowedOrigins
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+      // Permissive fallback
+      return callback(null, true);
+    },
+    methods: 'GET,POST,PUT,DELETE,OPTIONS',
     credentials: true,
   }),
 );

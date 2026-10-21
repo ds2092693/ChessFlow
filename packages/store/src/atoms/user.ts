@@ -1,8 +1,15 @@
 import { atom, selector } from 'recoil';
 
-const BACKEND_URL =
-  (typeof import.meta !== 'undefined' && (import.meta as any).env?.VITE_APP_BACKEND_URL) ||
-  'http://localhost:3000';
+const isBrowser = typeof window !== 'undefined';
+const isLocalhost =
+  isBrowser &&
+  (window.location.hostname === 'localhost' ||
+    window.location.hostname === '127.0.0.1');
+
+const BACKEND_URL = isLocalhost
+  ? 'http://localhost:3000'
+  : (typeof import.meta !== 'undefined' && (import.meta as any).env?.VITE_APP_BACKEND_URL) ||
+    'https://chessflow-backend.onrender.com';
 
 export interface User {
   id: string;
@@ -33,7 +40,7 @@ export const userAtom = atom<User | null>({
 
       try {
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 1200);
+        const timeoutId = setTimeout(() => controller.abort(), 2000);
 
         const response = await fetch(`${BACKEND_URL}/auth/refresh`, {
           method: 'GET',

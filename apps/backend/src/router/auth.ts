@@ -8,7 +8,17 @@ import { rateLimit } from '../middleware/rateLimit';
 
 const router = Router();
 
-const CLIENT_URL = process.env.AUTH_REDIRECT_URL ?? 'http://localhost:5173';
+function getClientUrl(req?: Request): string {
+  if (process.env.AUTH_REDIRECT_URL) return process.env.AUTH_REDIRECT_URL;
+  if (req?.headers?.origin) return req.headers.origin as string;
+  if (req?.headers?.referer) {
+    try {
+      const u = new URL(req.headers.referer as string);
+      return u.origin;
+    } catch {}
+  }
+  return "https://chessflow-px48.vercel.app";
+}
 const JWT_SECRET = process.env.JWT_SECRET || 'chessflow-secure-jwt-secret-2026-grandmaster';
 
 const isProd = process.env.NODE_ENV === 'production';
@@ -127,7 +137,7 @@ router.get('/login/failed', (_req, res) => {
 router.get('/logout', (req: Request, res: Response) => {
   res.clearCookie('guest');
   res.clearCookie('jwt');
-  res.redirect(CLIENT_URL);
+  res.redirect(getClientUrl(req));
 });
 
 // Google OAuth endpoint
@@ -180,10 +190,10 @@ router.get('/google', async (req: Request, res: Response, next: NextFunction) =>
 
     const token = jwt.sign({ userId: user.id, name: user.name, isGuest: false }, JWT_SECRET!);
     res.cookie('guest', token, cookieOptions);
-    res.redirect(`${CLIENT_URL}?auth=success&token=${token}&userId=${user.id}&name=${encodeURIComponent(user.name || '')}&provider=GOOGLE`);
+    res.redirect(`${getClientUrl(req)}?auth=success&token=${token}&userId=${user.id}&name=${encodeURIComponent(user.name || '')}&provider=GOOGLE`);
   } catch (err) {
     console.error('Google auth error:', err);
-    res.redirect(`${CLIENT_URL}/login?error=auth_failed`);
+    res.redirect(`${getClientUrl(req)}/login?error=auth_failed`);
   }
 });
 
@@ -197,7 +207,7 @@ router.get(
       JWT_SECRET!,
     );
     res.cookie('guest', token, cookieOptions);
-    res.redirect(`${CLIENT_URL}?auth=success&token=${token}&userId=${user.id}&name=${encodeURIComponent(user.name || '')}&provider=GOOGLE`);
+    res.redirect(`${getClientUrl(req)}?auth=success&token=${token}&userId=${user.id}&name=${encodeURIComponent(user.name || '')}&provider=GOOGLE`);
   },
 );
 
@@ -249,10 +259,10 @@ router.get('/github', async (req: Request, res: Response, next: NextFunction) =>
 
     const token = jwt.sign({ userId: user.id, name: user.name, isGuest: false }, JWT_SECRET!);
     res.cookie('guest', token, cookieOptions);
-    res.redirect(`${CLIENT_URL}?auth=success&token=${token}&userId=${user.id}&name=${encodeURIComponent(user.name || '')}&provider=GITHUB`);
+    res.redirect(`${getClientUrl(req)}?auth=success&token=${token}&userId=${user.id}&name=${encodeURIComponent(user.name || '')}&provider=GITHUB`);
   } catch (err) {
     console.error('GitHub auth error:', err);
-    res.redirect(`${CLIENT_URL}/login?error=auth_failed`);
+    res.redirect(`${getClientUrl(req)}/login?error=auth_failed`);
   }
 });
 
@@ -266,7 +276,7 @@ router.get(
       JWT_SECRET!,
     );
     res.cookie('guest', token, cookieOptions);
-    res.redirect(`${CLIENT_URL}?auth=success&token=${token}&userId=${user.id}&name=${encodeURIComponent(user.name || '')}&provider=GITHUB`);
+    res.redirect(`${getClientUrl(req)}?auth=success&token=${token}&userId=${user.id}&name=${encodeURIComponent(user.name || '')}&provider=GITHUB`);
   },
 );
 

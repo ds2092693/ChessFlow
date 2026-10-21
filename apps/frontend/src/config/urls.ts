@@ -1,34 +1,21 @@
-const isBrowser = typeof window !== 'undefined';
-const isLocalhost =
-  isBrowser &&
-  (window.location.hostname === 'localhost' ||
-    window.location.hostname === '127.0.0.1');
-
-function getBackendUrl(): string {
-  if (import.meta.env.VITE_APP_BACKEND_URL) {
-    const raw = import.meta.env.VITE_APP_BACKEND_URL;
-    return raw.startsWith('http://') || raw.startsWith('https://')
-      ? raw
-      : `https://${raw}`;
+export function getBackendUrl(): string {
+  if (typeof window !== 'undefined') {
+    const host = window.location.hostname;
+    if (host === 'localhost' || host === '127.0.0.1') {
+      return 'http://localhost:3000';
+    }
   }
-  if (!isLocalhost && isBrowser) {
-    return window.location.origin;
-  }
-  return 'http://localhost:3000';
+  return 'https://chessflow-backend.onrender.com';
 }
 
-function getWsUrl(): string {
-  if (import.meta.env.VITE_APP_WS_URL) {
-    const raw = import.meta.env.VITE_APP_WS_URL;
-    return raw.startsWith('ws://') || raw.startsWith('wss://')
-      ? raw
-      : `wss://${raw}`;
+export function getWsUrl(): string {
+  if (typeof window !== 'undefined') {
+    const host = window.location.hostname;
+    if (host === 'localhost' || host === '127.0.0.1') {
+      return 'ws://localhost:8080';
+    }
   }
-  if (!isLocalhost && isBrowser) {
-    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    return `${protocol}//${window.location.host}/ws`;
-  }
-  return 'ws://localhost:8080';
+  return 'wss://chessflow-ws.onrender.com';
 }
 
 export const BACKEND_URL = getBackendUrl();

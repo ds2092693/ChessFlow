@@ -34,3 +34,9 @@ Thumbs.db
 .turbo/
 **/.turbo/
 
+
+# Native binaries & Prisma caches
+*.node
+.prisma/
+**/.prisma/
+**/client/

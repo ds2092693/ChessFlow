@@ -11,22 +11,16 @@ services:
         destination: /index.html
     envVars:
       - key: VITE_APP_BACKEND_URL
-        fromService:
-          type: web
-          name: chessflow-backend
-          property: host
+        value: https://chessflow-backend.onrender.com
       - key: VITE_APP_WS_URL
-        fromService:
-          type: web
-          name: chessflow-ws
-          property: host
+        value: wss://chessflow-ws.onrender.com
 
   # 2. REST API Backend
   - type: web
     name: chessflow-backend
     env: node
     plan: free
-    buildCommand: npm install && npx turbo run build --filter=backend
+    buildCommand: npm install && node scripts/copy-engines.js && npx turbo run build --filter=backend
     startCommand: node apps/backend/dist/index.js
     envVars:
       - fromGroup: chessflow-secrets
@@ -40,7 +34,7 @@ services:
     name: chessflow-ws
     env: node
     plan: free
-    buildCommand: npm install && npx turbo run build --filter=ws
+    buildCommand: npm install && node scripts/copy-engines.js && npx turbo run build --filter=ws
     startCommand: node apps/ws/dist/index.js
     envVars:
       - fromGroup: chessflow-secrets
@@ -56,5 +50,17 @@ envVarGroups:
         generateValue: true
       - key: COOKIE_SECRET
         generateValue: true
-      - key: DATABASE_URL
-        value: file:./packages/db/prisma/dev.db
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: GOOGLE_CLIENT_SECRET
+        sync: false
+      - key: GITHUB_CLIENT_ID
+        sync: false
+      - key: GITHUB_CLIENT_SECRET
+        sync: false
+      - key: AUTH_REDIRECT_URL
+        value: https://chessflow-px48.vercel.app
+      - key: GOOGLE_CALLBACK_URL
+        value: https://chessflow-backend.onrender.com/auth/google/callback
+      - key: GITHUB_CALLBACK_URL
+        value: https://chessflow-backend.onrender.com/auth/github/callback

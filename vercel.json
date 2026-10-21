@@ -1,52 +1,6 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "services": {
-    "frontend": {
-      "root": "apps/frontend",
-      "framework": "vite"
-    },
-    "backend": {
-      "root": "apps/backend",
-      "framework": "express",
-      "buildCommand": "npx prisma generate --schema=../../packages/db/prisma/schema.prisma && npx esbuild src/index.ts --bundle --platform=node --outfile=dist/index.js"
-    },
-    "chessflow-ws": {
-      "root": ".",
-      "framework": "container",
-      "runtime": "container",
-      "buildCommand": "npm install && npx turbo run build --filter=ws"
-    }
-  },
   "rewrites": [
-    {
-      "source": "/api/(.*)",
-      "destination": {
-        "service": "backend"
-      }
-    },
-    {
-      "source": "/auth/(.*)",
-      "destination": {
-        "service": "backend"
-      }
-    },
-    {
-      "source": "/ws",
-      "destination": {
-        "service": "chessflow-ws"
-      }
-    },
-    {
-      "source": "/ws/(.*)",
-      "destination": {
-        "service": "chessflow-ws"
-      }
-    },
-    {
-      "source": "/(.*)",
-      "destination": {
-        "service": "frontend"
-      }
-    }
+    { "source": "/(.*)", "destination": "/index.html" }
   ]
 }
