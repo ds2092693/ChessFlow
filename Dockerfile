@@ -18,4 +18,4 @@ COPY --from=builder /app/packages ./packages
 COPY --from=builder /app/apps ./apps
 
 EXPOSE 3000 8080 5173
-CMD ["node", "apps/backend/dist/index.js"]
+CMD ["node", "apps/ws/dist/index.js"]
