@@ -144,57 +144,9 @@ router.get('/logout', (req: Request, res: Response) => {
 router.get('/google', async (req: Request, res: Response, next: NextFunction) => {
   const hasStrategy = (passport as any)._strategy('google');
   if (hasStrategy) {
-    return passport.authenticate('google', { scope: ['profile', 'email'] })(req, res, next);
+    return passport.authenticate('google', { scope: ['profile', 'email'], prompt: 'select_account' })(req, res, next);
   }
-
-  // Real database authentication fallback if Cloud Console Client ID is not yet defined
-  try {
-    const email = (req.query.email as string) || 'ds2092693@gmail.com';
-    const name = (req.query.name as string) || 'Divyanshu Sharma';
-
-    let user = await db.user.findFirst({
-      where: {
-        OR: [
-          { email },
-          { username: 'ds2092693' },
-          { username: 'divyanshusharma' },
-        ],
-      },
-    });
-
-    if (!user) {
-      user = await db.user.create({
-        data: {
-          email,
-          name,
-          username: 'divyanshusharma',
-          provider: 'GOOGLE',
-          playerRating: {
-            create: {
-              currentRating: 1200,
-              peakRating: 1200,
-              gamesPlayed: 0,
-              wins: 0,
-              losses: 0,
-              draws: 0,
-            },
-          },
-        },
-      });
-    } else {
-      user = await db.user.update({
-        where: { id: user.id },
-        data: { name, provider: 'GOOGLE', lastLogin: new Date() },
-      });
-    }
-
-    const token = jwt.sign({ userId: user.id, name: user.name, isGuest: false }, JWT_SECRET!);
-    res.cookie('guest', token, cookieOptions);
-    res.redirect(`${getClientUrl(req)}?auth=success&token=${token}&userId=${user.id}&name=${encodeURIComponent(user.name || '')}&provider=GOOGLE`);
-  } catch (err) {
-    console.error('Google auth error:', err);
-    res.redirect(`${getClientUrl(req)}/login?error=auth_failed`);
-  }
+  res.redirect(`${getClientUrl(req)}/login?error=google_not_configured_in_render`);
 });
 
 router.get(
@@ -217,53 +169,7 @@ router.get('/github', async (req: Request, res: Response, next: NextFunction) =>
   if (hasStrategy) {
     return passport.authenticate('github', { scope: ['read:user', 'user:email'] })(req, res, next);
   }
-
-  try {
-    const username = (req.query.username as string) || 'ds2092693';
-
-    let user = await db.user.findFirst({
-      where: {
-        OR: [
-          { username },
-          { email: `${username.toLowerCase()}@github.com` },
-          { email: `${username.toLowerCase()}@chessflow.io` },
-        ],
-      },
-    });
-
-    if (!user) {
-      user = await db.user.create({
-        data: {
-          username,
-          name: username,
-          email: `${username.toLowerCase()}@github.com`,
-          provider: 'GITHUB',
-          playerRating: {
-            create: {
-              currentRating: 1200,
-              peakRating: 1200,
-              gamesPlayed: 0,
-              wins: 0,
-              losses: 0,
-              draws: 0,
-            },
-          },
-        },
-      });
-    } else {
-      user = await db.user.update({
-        where: { id: user.id },
-        data: { provider: 'GITHUB', lastLogin: new Date() },
-      });
-    }
-
-    const token = jwt.sign({ userId: user.id, name: user.name, isGuest: false }, JWT_SECRET!);
-    res.cookie('guest', token, cookieOptions);
-    res.redirect(`${getClientUrl(req)}?auth=success&token=${token}&userId=${user.id}&name=${encodeURIComponent(user.name || '')}&provider=GITHUB`);
-  } catch (err) {
-    console.error('GitHub auth error:', err);
-    res.redirect(`${getClientUrl(req)}/login?error=auth_failed`);
-  }
+  res.redirect(`${getClientUrl(req)}/login?error=github_not_configured_in_render`);
 });
 
 router.get(

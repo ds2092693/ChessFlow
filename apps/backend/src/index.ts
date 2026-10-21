@@ -64,25 +64,20 @@ initPassport();
 // Sessions exist purely to carry the user through the OAuth handshake, so they
 // are only mounted when OAuth is configured. With OAuth off there is no session
 // store at all — nothing to leak, nothing to scale.
-if (oauthEnabled) {
-  app.use(
-    session({
-      secret: COOKIE_SECRET,
-      resave: false,
-      saveUninitialized: false,
-      cookie: {
-        secure: isProd,
-        sameSite: isProd ? 'none' : 'lax',
-        maxAge: COOKIE_MAX_AGE,
-      },
-    }),
-  );
-  app.use(passport.initialize());
-  app.use(passport.session());
-} else {
-  app.use(passport.initialize());
-  console.log('OAuth not configured — running with guest auth only (no sessions).');
-}
+app.use(
+  session({
+    secret: COOKIE_SECRET,
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+      secure: isProd,
+      sameSite: isProd ? 'none' : 'lax',
+      maxAge: COOKIE_MAX_AGE,
+    },
+  }),
+);
+app.use(passport.initialize());
+app.use(passport.session());
 
 app.use(
   cors({

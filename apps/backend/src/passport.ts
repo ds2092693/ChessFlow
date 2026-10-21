@@ -26,7 +26,7 @@ export function initPassport() {
         {
           clientID: GOOGLE_CLIENT_ID,
           clientSecret: GOOGLE_CLIENT_SECRET,
-          callbackURL: GOOGLE_CALLBACK_URL || 'http://localhost:3000/auth/google/callback',
+          callbackURL: GOOGLE_CALLBACK_URL || 'https://chessflow-backend.onrender.com/auth/google/callback',
         },
         async (_accessToken, _refreshToken, profile, done) => {
           try {
@@ -95,7 +95,7 @@ export function initPassport() {
         {
           clientID: GITHUB_CLIENT_ID,
           clientSecret: GITHUB_CLIENT_SECRET,
-          callbackURL: GITHUB_CALLBACK_URL || 'http://localhost:3000/auth/github/callback',
+          callbackURL: GITHUB_CALLBACK_URL || 'https://chessflow-backend.onrender.com/auth/github/callback',
         },
         async (accessToken: string, _refreshToken: string, profile: any, done: any) => {
           try {
