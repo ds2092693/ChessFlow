@@ -8,16 +8,18 @@ router.get('/', async (req, res) => {
     const limit = Math.min(parseInt(req.query.limit as string) || 50, 100);
 
     const players = await db.playerRating.findMany({
-      where: { gamesPlayed: { gt: 0 } },
       include: {
         user: { select: { id: true, username: true, name: true } },
       },
-      orderBy: { currentRating: 'desc' },
+      orderBy: [
+        { currentRating: 'desc' },
+        { gamesPlayed: 'desc' },
+      ],
       take: limit,
     });
 
     const data = players.map((p, index) => {
-      const displayName = p.user.username || p.user.name || 'Unknown Player';
+      const displayName = p.user.username || p.user.name || 'Anonymous Player';
       return {
         rank: index + 1,
         id: p.user.id,
@@ -60,12 +62,11 @@ router.get('/user/:userId', async (req, res) => {
     const higherRanked = await db.playerRating.count({
       where: {
         currentRating: { gt: playerRating.currentRating },
-        gamesPlayed: { gt: 0 },
       },
     });
 
     const displayName =
-      playerRating.user.username || playerRating.user.name || 'Unknown Player';
+      playerRating.user.username || playerRating.user.name || 'Anonymous Player';
 
     res.json({
       success: true,
