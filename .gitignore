@@ -30,3 +30,7 @@ Thumbs.db
 
 .turbo/*.dylib.node
 *.db-journal
+
+.turbo/
+**/.turbo/
+

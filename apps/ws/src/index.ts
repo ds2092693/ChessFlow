@@ -13,7 +13,7 @@ process.on('uncaughtException', (err) => {
   console.error('Uncaught exception:', err);
 });
 
-const PORT = Number(process.env.WS_PORT) || 8080;
+const PORT = Number(process.env.WS_PORT) || Number(process.env.PORT) || 8080;
 const wss = new WebSocketServer({ port: PORT });
 const gameManager = new GameManager();
 

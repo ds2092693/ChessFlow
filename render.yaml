@@ -1,0 +1,61 @@
+services:
+  # 1. Frontend Static Site
+  - type: web
+    name: chessflow-frontend
+    env: static
+    buildCommand: npm install && npm run build --filter=frontend
+    staticPublishPath: ./apps/frontend/dist
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
+    envVars:
+      - key: VITE_APP_BACKEND_URL
+        fromService:
+          type: web
+          name: chessflow-backend
+          property: host
+      - key: VITE_APP_WS_URL
+        fromService:
+          type: web
+          name: chessflow-ws
+          property: host
+
+  # 2. REST API Backend
+  - type: web
+    name: chessflow-backend
+    env: node
+    plan: free
+    buildCommand: npm install && npx prisma generate --schema=packages/db/prisma/schema.prisma && npm run build --filter=backend
+    startCommand: node apps/backend/dist/index.js
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: JWT_SECRET
+        generateValue: true
+      - key: COOKIE_SECRET
+        generateValue: true
+      - key: DATABASE_URL
+        value: file:./packages/db/prisma/dev.db
+
+  # 3. WebSocket Realtime Engine
+  - type: web
+    name: chessflow-ws
+    env: node
+    plan: free
+    buildCommand: npm install && npx prisma generate --schema=packages/db/prisma/schema.prisma && npm run build --filter=ws
+    startCommand: node apps/ws/dist/index.js
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: JWT_SECRET
+        fromService:
+          type: web
+          name: chessflow-backend
+          property: envVar:JWT_SECRET
+      - key: DATABASE_URL
+        value: file:./packages/db/prisma/dev.db

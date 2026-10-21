@@ -1,0 +1,39 @@
+version: '3.8'
+
+services:
+  backend:
+    build: .
+    command: node apps/backend/dist/index.js
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - DATABASE_URL=file:/app/packages/db/prisma/dev.db
+      - JWT_SECRET=chessflow-secure-jwt-secret-2026-grandmaster
+      - COOKIE_SECRET=chessflow-secure-cookie-secret-2026
+      - ALLOWED_ORIGINS=http://localhost:5173
+      - AUTH_REDIRECT_URL=http://localhost:5173
+    restart: unless-stopped
+
+  ws:
+    build: .
+    command: node apps/ws/dist/index.js
+    ports:
+      - "8080:8080"
+    environment:
+      - NODE_ENV=production
+      - WS_PORT=8080
+      - DATABASE_URL=file:/app/packages/db/prisma/dev.db
+      - JWT_SECRET=chessflow-secure-jwt-secret-2026-grandmaster
+    restart: unless-stopped
+
+  frontend:
+    build: .
+    command: npx serve -s apps/frontend/dist -l 5173
+    ports:
+      - "5173:5173"
+    environment:
+      - VITE_APP_BACKEND_URL=http://localhost:3000
+      - VITE_APP_WS_URL=ws://localhost:8080
+    restart: unless-stopped
