@@ -2,14 +2,14 @@
   "name": "chess-monorepo",
   "private": true,
   "scripts": {
-    "build": "turbo build",
+    "build": "turbo build && node scripts/copy-dist.js",
     "dev": "turbo dev"
   },
   "devDependencies": {
     "turbo": "latest"
   },
   "engines": {
-    "node": "24.x"
+    "node": ">=22.x"
   },
   "packageManager": "npm@10.9.3",
   "workspaces": [
