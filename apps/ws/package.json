@@ -8,7 +8,7 @@
     "dev": "npm run build && npm run start",
     "test": "tsc src/ai/minimax.ts src/ai/minimax.test.ts src/services/ratingService.ts src/services/ratingService.test.ts --rootDir src --target es2020 --module commonjs --esModuleInterop --strict --skipLibCheck --outDir dist-test && node --test dist-test/ai/minimax.test.js dist-test/services/ratingService.test.js"
   },
-  "license": "ISC",
+  "license": "UNLICENSED",
   "dependencies": {
     "@prisma/client": "^5.12.1",
     "@repo/db": "*",

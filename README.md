@@ -6,7 +6,6 @@
 [![Author](https://img.shields.io/badge/Author-Divyanshu%20Sharma-blue?style=for-the-badge&logo=github)](https://github.com/ds2092693)
 [![LinkedIn](https://img.shields.io/badge/LinkedIn-Divyanshu%20Sharma-0A66C2?style=for-the-badge&logo=linkedin)](https://www.linkedin.com/in/divyanshu-sharma-899267297/)
 [![Built with Turborepo](https://img.shields.io/badge/Built%20with-Turborepo-EF4444?style=for-the-badge&logo=turborepo)](https://turbo.build/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-emerald?style=for-the-badge)](LICENSE)
 
 <br/>
 
@@ -200,9 +199,3 @@ npm run build
 **Divyanshu Sharma**
 - **GitHub**: [@ds2092693](https://github.com/ds2092693)
 - **LinkedIn**: [divyanshu-sharma-899267297](https://www.linkedin.com/in/divyanshu-sharma-899267297/)
-
----
-
-## 📄 License
-
-This project is licensed under the **MIT License** — see the [LICENSE](LICENSE) file for complete details.

@@ -52,7 +52,7 @@ export const Footer = () => {
         </div>
       </div>
       <div className="mt-8 text-center text-xs text-slate-600 border-t border-slate-900/60 pt-6">
-        © 2026 Divyanshu Sharma. Open-source under MIT License.
+        © 2026 ChessFlow by Divyanshu Sharma. All rights reserved.
       </div>
     </footer>
   );
