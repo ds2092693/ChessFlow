@@ -24,10 +24,7 @@ process.on('uncaughtException', (err) => {
   console.error('Uncaught exception:', err);
 });
 
-const COOKIE_SECRET = process.env.COOKIE_SECRET;
-if (!COOKIE_SECRET) {
-  throw new Error('COOKIE_SECRET environment variable is required');
-}
+const COOKIE_SECRET = process.env.COOKIE_SECRET || 'chessflow-secure-cookie-secret-2026';
 
 const allowedOrigins = process.env.ALLOWED_ORIGINS
   ? process.env.ALLOWED_ORIGINS.split(',').map((o) => o.trim())
@@ -105,7 +102,11 @@ app.use(
   },
 );
 
-const PORT = Number(process.env.PORT) || 3000;
-app.listen(PORT, () => {
-  console.log(`Server listening on port ${PORT}`);
-});
+if (process.env.VERCEL !== '1') {
+  const PORT = Number(process.env.PORT) || 3000;
+  app.listen(PORT, () => {
+    console.log(`Server listening on port ${PORT}`);
+  });
+}
+
+export default app;
