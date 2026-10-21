@@ -76,7 +76,8 @@ router.post('/guest', guestLimiter, async (req: Request, res: Response) => {
     } satisfies UserDetails);
   } catch (err) {
     console.error('Guest login failed:', err);
-    res.status(500).json({ success: false, message: 'Failed to create guest account' });
+    const msg = err instanceof Error ? err.message : String(err);
+    res.status(500).json({ success: false, message: 'Failed to create guest account', error: msg });
   }
 });
 

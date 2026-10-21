@@ -42,7 +42,7 @@ router.get('/', async (req, res) => {
     res.json({ success: true, data, count: data.length });
   } catch (error) {
     console.error('Leaderboard error:', error);
-    res.status(500).json({ success: false, error: 'Failed to fetch leaderboard' });
+    res.status(500).json({ success: false, error: (error && error.message) ? error.message : String(error) });
   }
 });
 
