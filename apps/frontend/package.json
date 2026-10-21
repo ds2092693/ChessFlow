@@ -8,7 +8,7 @@
   },
   "scripts": {
     "dev": "vite",
-    "build": "tsc && vite build && cp dist/index.html dist/404.html && cp dist/index.html dist/login.html",
+    "build": "tsc && vite build && cp dist/index.html dist/404.html && cp dist/index.html dist/login.html && cp dist/index.html dist/leaderboard.html && cp dist/index.html dist/profile.html && cp dist/index.html dist/settings.html",
     "lint": "eslint . --ext ts,tsx",
     "preview": "vite preview"
   },
