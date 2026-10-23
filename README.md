@@ -3,9 +3,18 @@
 # ♞ ChessFlow
 ### Real-Time Distributed WebSocket Chess & In-House Minimax AI Platform
 
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-chessflow--px48.vercel.app-000000?style=for-the-badge&logo=vercel&logoColor=white)](https://chessflow-px48.vercel.app/)
+[![API Backend](https://img.shields.io/badge/API-Render-46E3B7?style=for-the-badge&logo=render&logoColor=white)](https://chessflow-backend.onrender.com/health)
+[![WebSocket Gateway](https://img.shields.io/badge/WebSocket-Live-brightgreen?style=for-the-badge&logo=socketdotio)](https://chessflow-px48.vercel.app/)
 [![Author](https://img.shields.io/badge/Author-Divyanshu%20Sharma-blue?style=for-the-badge&logo=github)](https://github.com/ds2092693)
 [![LinkedIn](https://img.shields.io/badge/LinkedIn-Divyanshu%20Sharma-0A66C2?style=for-the-badge&logo=linkedin)](https://www.linkedin.com/in/divyanshu-sharma-899267297/)
 [![Built with Turborepo](https://img.shields.io/badge/Built%20with-Turborepo-EF4444?style=for-the-badge&logo=turborepo)](https://turbo.build/)
+
+<br/>
+
+> 🎮 **Play Live Now:** **[https://chessflow-px48.vercel.app](https://chessflow-px48.vercel.app/)**
+> 
+> *Live deployment on Vercel Edge & Render with server-authoritative WebSocket clustering and real Google/GitHub OAuth.*
 
 <br/>
 
